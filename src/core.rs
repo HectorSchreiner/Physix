@@ -1,13 +1,42 @@
 
-struct Physix {
-}
+pub mod physix {
 
 type real = f32;
 
-struct Vector3 {
-    x: real,
-    y: real,
-    z: real
+#[derive(Debug, Clone, Copy)]
+pub struct Vector3 {
+    pub x: real,
+    pub y: real,
+    pub z: real
+}
+
+impl Vector3 {
+    pub fn new(x: real, y: real, z: real) -> Self {
+        Self { x, y, z }
+    }
+
+    pub fn invert(self) -> Self {
+        Self { x: -self.x, y: -self.y, z: -self.z }
+    }
+
+    pub fn len(self) -> real {
+        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+    }
+
+    pub fn squared_len(self) -> real {
+        (self.x * self.x + self.y * self.y + self.z * self.z)
+    }
+
+    pub fn normal(&mut self) {
+        let l: real = self.len();
+        if l > 0.0 {
+            self.x = self.x / l;
+            self.y = self.y / l;
+            self.z = self.z / l;
+        }
+    }
+
+    
 }
 
 impl std::ops::Add for Vector3 {
@@ -40,4 +69,6 @@ impl std::ops::SubAssign for Vector3 {
         self.y -= other.y;
         self.z -= other.z;
     }
+}
+
 }
