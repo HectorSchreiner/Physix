@@ -2,16 +2,16 @@
 use crate::core::physix::*;
 
 pub struct Particle {
-    position: Vector3,
-    velocity: Vector3,
-    acceleration: Vector3,
+    pub position: Vector3,
+    pub velocity: Vector3,
+    pub acceleration: Vector3,
     damping: real,
     inverse_mass: real,
-    force_accumulated: Vector3,
+    pub force_accumulated: Vector3,
 }
 
 impl Particle {
-    pub fn get_inverse_mass(self) -> real {
+    pub fn get_inverse_mass(&self) -> real {
         self.inverse_mass
     }
 
@@ -47,7 +47,39 @@ impl Particle {
         self.force_accumulated += *force;
     }
 }
-
 pub trait ParticleForceGenerator {
-    fn update_force(particle: &Particle, duration: real) { todo!() }
+    fn update_force(&self, particle: &Particle, duration: real) { todo!() }
+}
+
+struct ParticleForceRegistration<'a> {
+    particle: &'a Particle,
+    fg: &'a dyn ParticleForceGenerator,
+}
+
+struct ParticleForceRegistry<'a> {
+    registrations: Vec<ParticleForceRegistration<'a>>,
+}
+
+impl ParticleForceRegistry<'_> {
+    fn update_forces(&mut self, duration: real) {
+        self.registrations.
+        iter().
+        for_each(|i| {
+            i.fg.update_force(i.particle, duration)
+        });
+    }
+}
+
+
+struct ParticleGravity;
+
+impl ParticleForceGenerator for ParticleGravity {
+    fn update_force(&self, particle: &Particle, duration: real) {
+        // hvis masse er uendelig returner
+        if particle.get_inverse_mass() >= 0.0 { return; }
+
+        // apply force scaled with mass to particle
+        particle.add_force(gravity * 1/particle.get_inverse_mass())
+
+    }
 }
