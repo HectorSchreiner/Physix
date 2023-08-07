@@ -1,19 +1,36 @@
 mod core;
 mod particle;
-use crate::{
-    core::physix::{self, Vector3},
-    particle::{Particle, ParticleForceRegistration, ParticleForceRegistry},
-};
+mod renderer;
+pub use minifb;
+use minifb::*;
+use renderer::*;
 
-fn main() {
-    println!("Hello, world!");
-    let a = physix::Vector3::new(1.0, 0.0, 0.0);
-    let b = physix::Vector3::new(0.0, 1.0, 0.0);
-    let c = a.cross_product(b);
+use crate::core::*;
 
-    let registry = ParticleForceRegistry {
-        registrations: vec![],
+// Tested on Windows with msvc compiler toolchain
+pub fn main() {
+    let mut renderer = Renderer {
+        buffer: vec![0; WIDTH * HEIGHT],
     };
 
-    println!("cross {:?} invert: {:?}", c, c.invert());
+    let mut window = Window::new(
+        "Physix",
+        WIDTH,
+        HEIGHT,
+        WindowOptions::default(),
+    )
+    .unwrap();
+
+    // Limit to max ~60 fps update rate
+    window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
+
+    while window.is_open() && !window.is_key_down(Key::Escape) {
+        window
+            .update_with_buffer(&renderer.buffer, WIDTH, HEIGHT)
+            .unwrap();
+        (&mut renderer, &window);
+
+        renderer.clear(Color::BLACK); //Clear screen
+        Rectangle::new(20, 20, (20, 20)).draw(&mut renderer, Color::WHITE);
+    }
 }
