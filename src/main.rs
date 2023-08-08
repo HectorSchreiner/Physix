@@ -1,11 +1,13 @@
 mod core;
 mod particle;
 mod renderer;
+
 pub use minifb;
 use minifb::*;
 use renderer::*;
 
 use crate::core::*;
+use crate::particle::*;
 
 // Tested on Windows with msvc compiler toolchain
 pub fn main() {
@@ -13,13 +15,7 @@ pub fn main() {
         buffer: vec![0; WIDTH * HEIGHT],
     };
 
-    let mut window = Window::new(
-        "Physix",
-        WIDTH,
-        HEIGHT,
-        WindowOptions::default(),
-    )
-    .unwrap();
+    let mut window = Window::new("Physix", WIDTH, HEIGHT, WindowOptions::default()).unwrap();
 
     // Limit to max ~60 fps update rate
     window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
@@ -31,6 +27,9 @@ pub fn main() {
         (&mut renderer, &window);
 
         renderer.clear(Color::BLACK); //Clear screen
-        Rectangle::new(20, 20, (20, 20)).draw(&mut renderer, Color::WHITE);
     }
+}
+
+fn test() {
+    let particle = Particle::default(physix::Vector3::new(200.0, 200.0, 0.0));
 }

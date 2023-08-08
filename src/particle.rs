@@ -10,6 +10,34 @@ pub struct Particle {
 }
 
 impl Particle {
+    pub fn default(position: Vector3) -> Self {
+        Self {
+            position,
+            velocity: Vector3::new(0.0, 0.0, 0.0),
+            acceleration: Vector3::new(0.0, 0.0, 0.0),
+            damping: 1.0,
+            inverse_mass: 1.0,
+            force_accumulated: Vector3::new(0.0, 0.0, 0.0),
+        }
+    }
+    pub fn new(
+        self,
+        position: Vector3,
+        velocity: Vector3,
+        acceleration: Vector3,
+        damping: real,
+        inverse_mass: real,
+        force_accumulated: Vector3,
+    ) -> Self {
+        Self {
+            position,
+            velocity,
+            acceleration,
+            damping,
+            inverse_mass,
+            force_accumulated,
+        }
+    }
     pub fn get_inverse_mass(&self) -> real {
         self.inverse_mass
     }
@@ -28,9 +56,7 @@ impl Particle {
 }
 
 pub trait ParticleForceGenerator {
-    fn update_force(&self, particle: &mut Particle, duration: real) {
-        todo!()
-    }
+    fn update_force(&self, particle: &mut Particle, duration: real) {}
 }
 
 pub struct ParticleForceRegistration<'a> {
