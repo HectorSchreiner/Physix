@@ -1,4 +1,7 @@
-use crate::core::physix::*;
+use crate::{
+    core::{physix::*, rk4},
+    renderer::{Draw, Rectangle},
+};
 
 pub struct Particle {
     pub position: Vector3,
@@ -53,34 +56,66 @@ impl Particle {
     fn add_force(&mut self, force: &Vector3) {
         self.force_accumulated += *force;
     }
+
+    fn integrate_rk4(&mut self, duration: real) {
+        assert!(duration > 0.0);
+
+        // get position from velocity
+        self.position.add_scaled_vector(self.velocity, duration);
+
+        // get velocity from acceleration
+        self.velocity = rk4(self.acceleration, duration);
+
+        // F = m*a -> a = F/m får acceleration ud fra den akkumulerede kraft
+        self.acceleration += self.force_accumulated.mul(self.get_inverse_mass());
+    }
 }
 
 pub trait ParticleForceGenerator {
     fn update_force(&self, particle: &mut Particle, duration: real) {}
 }
 
-pub struct ParticleForceRegistration<'a> {
-    particle: &'a mut Particle,
-    force_generator: &'a dyn ParticleForceGenerator,
+pub struct ParticleForceRegistration<'a, T: ParticleForceGenerator> {
+    pub particle: &'a mut Particle,
+    pub particle_force_generator: T,
 }
 
-pub struct ParticleForceRegistry<'a> {
-    registrations: Vec<ParticleForceRegistration<'a>>,
+pub struct ParticleForceRegistry<'a, T: ParticleForceGenerator> {
+    pub registrations: Vec<ParticleForceRegistration<'a, T>>,
 }
 
-impl ParticleForceRegistry<'_> {
-    fn update_forces(&mut self, duration: real) {
-        self.registrations
-            .iter_mut()
-            .for_each(|reg| reg.force_generator.update_force(reg.particle, duration));
+impl<'a, T> ParticleForceRegistry<'a, T>
+where
+    T: ParticleForceGenerator,
+{
+    pub fn update_forces(&mut self, duration: real) {
+        self.registrations.iter_mut().for_each(|reg| {
+            reg.particle_force_generator
+                .update_force(reg.particle, duration)
+        });
+    }
+
+    pub fn add_generator_and_particle(
+        &mut self,
+        particle: &mut Particle,
+        particle_force_generator: T,
+    ) {
+        let new_registration = ParticleForceRegistration {
+            particle,
+            particle_force_generator,
+        };
+        self.registrations.push(ParticleForceRegistration {
+            particle,
+            particle_force_generator: new_registration,
+        });
     }
 }
 
-struct ParticleGravity {
-    gravity: Vector3,
+pub struct ParticleGravityForceGenerator {
+    pub gravity: Vector3,
 }
 
-impl ParticleForceGenerator for ParticleGravity {
+impl ParticleForceGenerator for ParticleGravityForceGenerator {
     fn update_force(&self, particle: &mut Particle, duration: real) {
         // hvis masse er uendelig returner
         if particle.get_inverse_mass() >= 0.0 {
