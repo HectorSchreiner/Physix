@@ -4,8 +4,13 @@ pub const WIDTH: usize = 1200;
 pub const HEIGHT: usize = 600;
 pub const PI: f32 = 3.1415;
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum Color {
+    rgb(String),
+}
+
+#[derive(Clone, Copy)]
+pub enum SimpleColor {
     WHITE = 0xffffff,
     BLACK = 0x000000,
     RED = 0xff0000,
@@ -17,7 +22,7 @@ pub struct Renderer {
     pub buffer: Vec<u32>,
 }
 impl Renderer {
-    pub fn draw_pixel(&mut self, position: (u32, u32), color: Color) {
+    pub fn draw_pixel(&mut self, position: (u32, u32), color: SimpleColor) {
         if position.0 < WIDTH as u32
             && position.0 > 0
             && position.1 < HEIGHT as u32
@@ -27,7 +32,7 @@ impl Renderer {
         }
     }
 
-    pub fn clear(&mut self, color: Color) {
+    pub fn clear(&mut self, color: SimpleColor) {
         for iter in 0..HEIGHT * WIDTH {
             self.buffer[iter] = color as _;
         }
@@ -35,7 +40,7 @@ impl Renderer {
 }
 
 pub trait Draw {
-    fn draw(&self, renderer: &mut Renderer, color: Color) {}
+    fn draw(&self, renderer: &mut Renderer, color: SimpleColor) {}
 }
 
 pub struct Rectangle {
@@ -53,7 +58,7 @@ impl Rectangle {
     }
 }
 impl Draw for Rectangle {
-    fn draw(&self, renderer: &mut Renderer, color: Color) {
+    fn draw(&self, renderer: &mut Renderer, color: SimpleColor) {
         let pos_y = self.position.1;
         let pos_x = self.position.0;
 
@@ -81,7 +86,7 @@ impl Line {
     }
 }
 impl Draw for Line {
-    fn draw(&self, renderer: &mut Renderer, color: Color) {
+    fn draw(&self, renderer: &mut Renderer, color: SimpleColor) {
         for (x, y) in Bresenham::new(
             (self.pos_1.0 as i32, self.pos_1.1 as i32),
             (self.pos_2.0 as i32, self.pos_2.1 as i32),
