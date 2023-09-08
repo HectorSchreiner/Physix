@@ -2,6 +2,9 @@ mod core;
 mod particle;
 mod renderer;
 
+use crate::core::physix::Vector3;
+use std::rc::Rc;
+
 pub use minifb;
 use minifb::*;
 use renderer::*;
@@ -15,6 +18,22 @@ pub fn main() {
 
     let mut renderer = Renderer {
         buffer: vec![0; WIDTH * HEIGHT],
+    };
+
+    let mut particle_1 = Particle::default(Vector3::new(0.0, 0.0, 0.0));
+
+    let mut gravity_force_generator = ParticleGravityForceGenerator {};
+
+    let mut registry = ParticleRegistry {
+        registations: vec![],
+    };
+    let registration_1 = ParticleRegistration {
+        particle: Rc::from(&mut particle_1),
+        force_generator: &mut gravity_force_generator,
+    };
+    let registration_2 = ParticleRegistration {
+        particle: Rc::from(&mut particle_1),
+        force_generator: &mut gravity_force_generator,
     };
 
     // Limit to max ~60 fps update rate

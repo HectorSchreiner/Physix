@@ -1,6 +1,8 @@
+use std::rc::Rc;
+
 use crate::{
     core::{physix::*, rk4},
-    renderer::{Draw, Rectangle, Color},
+    renderer::{Color, Draw, Rectangle},
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -59,17 +61,20 @@ impl Particle {
     }
 }
 
-pub struct ParticleSize {
-    start: f32,
-    end: f32,
+pub struct ParticleRegistry<'a> {
+    pub registations: Vec<&'a mut ParticleRegistration<'a>>,
 }
 
-pub struct ParticleVelocity {
-    start: Vector3,
-    end: Vector3,
+pub struct ParticleRegistration<'a> {
+    pub particle: Rc<&'a mut Particle>,
+    pub force_generator: &'a dyn ParticleForceGenerator,
 }
 
-pub struct ParticleColor {
-    start: Color,
-    end: Color,
+pub trait ParticleForceGenerator {}
+
+pub struct ParticleGravityForceGenerator {}
+impl ParticleForceGenerator for ParticleGravityForceGenerator {}
+
+impl ParticleRegistry<'_> {
+    pub fn update_registry_forces() {}
 }
