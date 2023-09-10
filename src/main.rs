@@ -3,6 +3,7 @@ mod particle;
 mod renderer;
 
 use crate::core::physix::Vector3;
+use std::cell::RefCell;
 use std::rc::Rc;
 
 pub use minifb;
@@ -24,15 +25,14 @@ pub fn main() {
 
     let mut gravity_force_generator = ParticleGravityForceGenerator {};
 
-    let mut registry = ParticleRegistry {
-        registations: vec![],
-    };
+    let mut registry = ParticleRegistry::new();
+
     let registration_1 = ParticleRegistration {
-        particle: Rc::from(&mut particle_1),
+        particle: Rc::from(RefCell::from(&mut particle_1)),
         force_generator: &mut gravity_force_generator,
     };
     let registration_2 = ParticleRegistration {
-        particle: Rc::from(&mut particle_1),
+        particle: Rc::from(RefCell::from(&mut particle_1)),
         force_generator: &mut gravity_force_generator,
     };
 
